@@ -25,7 +25,8 @@
       --shadow2:  rgba(28,26,23,0.18);
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; box-sizing: border-box; overflow-x: hidden; }
+    body { overflow-x: hidden; }
 
     body {
       background: var(--paper);
@@ -33,7 +34,6 @@
       font-family: 'IBM Plex Sans', sans-serif;
       font-size: 16px;
       line-height: 1.65;
-      overflow-x: hidden;
     }
 
     /* ── Grain overlay ── */
@@ -242,7 +242,7 @@
 
     .hero-title {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(4rem, 8vw, 7rem);
+      font-size: clamp(3rem, 8vw, 7rem);
       letter-spacing: 0.03em;
       line-height: 0.95;
       color: var(--paper);
@@ -297,7 +297,7 @@
       content: '#30';
       position: absolute;
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 28vw; letter-spacing: -0.02em;
+      font-size: 28vw; letter-spacing: -0.02em; overflow: hidden; max-width: 100%;
       color: rgba(28,26,23,0.04);
       line-height: 1;
       pointer-events: none;
@@ -603,13 +603,50 @@
     .value-desc { font-size: 0.88rem; color: var(--slate); line-height: 1.7; }
 
     /* Client logos */
+    /* Desktop logo strip */
     .clients-bar {
-      display: flex; flex-wrap: wrap; gap: 2rem;
-      align-items: center; justify-content: center;
-      padding: 2.5rem; border: 1px solid var(--rule);
-      margin-top: 3rem; background: var(--cream);
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0;
+      margin-top: 3rem;
+      border: 1px solid var(--rule);
     }
-    .clients-bar img { height: 52px; object-fit: contain; filter: grayscale(0.4) contrast(0.9); opacity: 0.85; }
+    .clients-bar img {
+      width: 100%; height: 100px;
+      object-fit: contain; padding: 1.5rem;
+      filter: grayscale(0.4) contrast(0.9); opacity: 0.85;
+      border-right: 1px solid var(--rule);
+      background: var(--cream);
+      transition: opacity 0.2s, filter 0.2s;
+    }
+    .clients-bar img:last-child { border-right: none; }
+    .clients-bar img:hover { opacity: 1; filter: grayscale(0); }
+
+    /* Mobile logo carousel */
+    .logo-carousel-wrapper { display: none; margin-top: 2rem; overflow: hidden; }
+    .logo-carousel-track {
+      display: flex;
+      animation: logoScroll 12s linear infinite;
+      width: max-content;
+    }
+    .logo-carousel-track:hover { animation-play-state: paused; }
+    .logo-carousel-track img {
+      height: 64px; width: auto;
+      object-fit: contain;
+      padding: 0.5rem 1.5rem;
+      filter: grayscale(0.3);
+      opacity: 0.85;
+      flex-shrink: 0;
+    }
+    @keyframes logoScroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    @media (max-width: 700px) {
+      .clients-bar { display: none; }
+      .logo-carousel-wrapper { display: block; }
+    }
 
     /* ══════════════════════════════════════
        SHOP
@@ -844,8 +881,14 @@
     ══════════════════════════════════════ */
     @media (max-width: 960px) {
       #hero { grid-template-columns: 1fr; }
-      .hero-right { min-height: 50vw; }
+      .hero-left { padding: 60px 4vw 50px; }
+      .hero-right { min-height: 55vw; }
+      .hero-title { font-size: clamp(3rem, 10vw, 5rem); }
+      .hero-sub { max-width: 100%; }
+      .btn-group { flex-wrap: wrap; }
+      .hero-stats { gap: 0; }
       .product-grid, .about-grid { grid-template-columns: 1fr; }
+      .product-img-duo { max-width: 520px; margin: 0 auto; }
       .features-grid { grid-template-columns: 1fr 1fr; }
       .features-grid .feature-card:nth-child(3n) { border-right: 1px solid rgba(255,255,255,0.08); }
       .features-grid .feature-card:nth-child(2n) { border-right: none; }
@@ -863,7 +906,11 @@
     }
 
     @media (max-width: 600px) {
-      section { padding: 60px 4vw; }
+      section { padding: 55px 5vw; }
+      .hero-left { padding: 50px 5vw 45px; }
+      .hero-title { font-size: clamp(2.8rem, 11vw, 4rem); line-height: 0.95; }
+      .hero-stats { flex-wrap: nowrap; overflow-x: auto; }
+      .hero-stat { min-width: 80px; }
       nav { padding: 0 1.25rem; }
       .hero-left { padding: 60px 1.25rem 50px; }
       .hero-title { font-size: 3.5rem; }
@@ -878,14 +925,79 @@
       .values-grid { grid-template-columns: 1fr; }
       .value-card { border-right: none; }
       .form-row { grid-template-columns: 1fr; }
-      .product-img-duo { grid-template-columns: 1fr; }
-      .product-img-duo img:first-child { grid-column: span 1; }
+      .product-img-duo { grid-template-columns: 1fr 1fr; max-width: 100%; }
+      .product-img-duo img:first-child { grid-column: span 2; }
       .shop-layout { padding: 40px 1.25rem 60px; }
       .cart-sidebar { position: static; margin-top: 2rem; }
       .page-hero { padding: 60px 1.25rem 50px; }
       footer { flex-direction: column; align-items: flex-start; padding: 2rem 1.25rem; }
       .tab-nav { overflow-x: auto; }
       .tab-btn { white-space: nowrap; }
+    }
+
+    /* ── Carousel ── */
+    .carousel {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      touch-action: pan-y;
+    }
+    .carousel-track {
+      display: flex;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+    .carousel-slide {
+      min-width: 100%;
+      flex-shrink: 0;
+    }
+    .carousel-slide img {
+      width: 100%;
+      display: block;
+      filter: contrast(1.04) saturate(0.85);
+    }
+    .carousel-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .carousel-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--sand);
+      border: none; cursor: pointer; padding: 0;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .carousel-dot.active {
+      background: var(--amber);
+      transform: scale(1.3);
+    }
+    .carousel-arrow {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      background: var(--ink);
+      color: var(--paper);
+      border: none; cursor: pointer;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      z-index: 2;
+    }
+    .carousel-arrow:hover { opacity: 1; }
+    .carousel-arrow.prev { left: 0.5rem; }
+    .carousel-arrow.next { right: 0.5rem; }
+
+    /* On desktop, show the grid; on mobile show carousel */
+    .carousel-wrapper { display: none; }
+    .grid-wrapper { display: block; }
+
+    @media (max-width: 700px) {
+      .carousel-wrapper { display: block; }
+      .grid-wrapper { display: none; }
     }
   </style>
 </head>
@@ -967,9 +1079,9 @@
           <a class="btn btn-outline" data-page="about" style="cursor:pointer">Our Story</a>
         </div>
       </div>
-      <div class="product-img-duo">
-        <img src="https://static.wixstatic.com/media/7eba66_27dd8c33a1fb488095357bc623974f6f~mv2.jpg" alt="Catcher+ with Extrol Tank"/>
-        <img src="https://static.wixstatic.com/media/7eba66_0e9cd757437b40fa938c0522a5edee7c~mv2.jpg" alt="#30 Catcher+"/>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;align-items:start">
+        <img src="https://static.wixstatic.com/media/7eba66_27dd8c33a1fb488095357bc623974f6f~mv2.jpg" alt="Catcher+ with Extrol Tank" style="width:100%;display:block;filter:contrast(1.04) saturate(0.85);border:1px solid var(--rule)"/>
+        <img src="https://static.wixstatic.com/media/7eba66_0e9cd757437b40fa938c0522a5edee7c~mv2.jpg" alt="#30 Catcher+" style="width:100%;display:block;filter:contrast(1.04) saturate(0.85);border:1px solid var(--rule)"/>
       </div>
     </div>
   </section>
@@ -985,7 +1097,7 @@
     <div class="features-grid">
       <div class="feature-card"><div class="feature-num">01</div><div class="feature-title">Easy Installation</div><p class="feature-desc">Any tech can install it quickly, without special tools or a lengthy setup. Less time fumbling, more time moving on to the next job.</p></div>
       <div class="feature-card"><div class="feature-num">02</div><div class="feature-title">Universal Compatibility</div><p class="feature-desc">Works with #30 and #60 Extrol tanks and a wide range of residential and commercial heating systems right out of the box.</p></div>
-      <div class="feature-card"><div class="feature-num">03</div><div class="feature-title">Durable Construction</div><p class="feature-desc">Heavy-duty materials built for real job site conditions — designed for the field, not a showroom shelf.</p></div>
+      <div class="feature-card"><div class="feature-num">03</div><div class="feature-title">Durable Construction</div><p class="feature-desc">Industrial-grade polyester mesh and reinforced nylon built to handle real job site conditions — designed for the field, not a showroom shelf.</p></div>
       <div class="feature-card"><div class="feature-num">04</div><div class="feature-title">Saves Time Per Job</div><p class="feature-desc">The Catcher+ streamlines the maintenance process, meaningfully cutting service time on each visit.</p></div>
       <div class="feature-card"><div class="feature-num">05</div><div class="feature-title">Professional Grade</div><p class="feature-desc">Trusted by licensed HVAC professionals and savvy homeowners alike. A real tool for real work.</p></div>
       <div class="feature-card"><div class="feature-num">06</div><div class="feature-title">Real Local Support</div><p class="feature-desc">Call (603) 762-1850 or email Easyway30@gmail.com. We're real people and we'll pick up.</p></div>
@@ -1064,32 +1176,70 @@
   </section>
 
   <section style="background:var(--cream)">
-    <div class="product-grid">
-      <div>
-        <div class="section-label">The Product</div>
-        <h2 class="section-title">What Is the<br>#30 Catcher+?</h2>
-        <p class="about-body">After many years in the industry, Peter wanted to make managing #30 and #60 Extrol tanks safer and simpler. When completely filled, these tanks can weigh up to 60 lbs — making them difficult to handle and prone to creating hazardous, costly messes.</p>
-        <p class="about-body">The #30 Catcher+ features highly rip-resistant polyester fiber industrial-grade material top to bottom, heavy-duty steel chambers, and grappling hooks for a secure operation. Multi-use and heavy duty — your whole team will be saying <em>"That was Easy."</em></p>
-        <a class="btn btn-outline" data-page="shop" style="cursor:pointer;margin-top:0.5rem">Order Now — $140.00</a>
+    <!-- Text row -->
+    <div style="max-width:680px;margin-bottom:3rem">
+      <div class="section-label">The Product</div>
+      <h2 class="section-title">What Is the #30 Catcher+?</h2>
+      <p class="about-body">After many years in the industry, Peter wanted to make managing #30 and #60 Extrol tanks safer and simpler. When completely filled, these tanks can weigh up to 60 lbs — making them difficult to handle and prone to creating hazardous, costly messes.</p>
+      <p class="about-body">The #30 Catcher+ is a heavy-duty catching bag made from rip-resistant polyester fiber and industrial-grade mesh, with reinforced steel grappling hooks that lock securely onto the tank. Multi-use and built to last — your whole team will be saying <em>"That was Easy."</em></p>
+      <a class="btn btn-outline" data-page="shop" style="cursor:pointer;margin-top:0.5rem">Order Now — $140.00</a>
+    </div>
+    <!-- Desktop: 3-image strip -->
+    <div class="grid-wrapper" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem">
+      <img src="https://static.wixstatic.com/media/7eba66_d3964341206e4963a856bac28957d034~mv2.jpg" alt="Catcher+ detail" style="width:100%;display:block;filter:contrast(1.04) saturate(0.85);border:1px solid var(--rule)"/>
+      <img src="https://static.wixstatic.com/media/7eba66_e323a9d7f31f4887a8dc42561b667ed4~mv2.jpg" alt="Catcher+ in use" style="width:100%;display:block;filter:contrast(1.04) saturate(0.85);border:1px solid var(--rule)"/>
+      <img src="https://static.wixstatic.com/media/7eba66_a022e29e231e4215a4890c772896934a~mv2.jpg" alt="Catcher+ close up" style="width:100%;display:block;filter:contrast(1.04) saturate(0.85);border:1px solid var(--rule)"/>
+    </div>
+    <!-- Mobile: swipeable carousel -->
+    <div class="carousel-wrapper">
+      <div class="carousel" id="about-carousel">
+        <button class="carousel-arrow prev" data-carousel="about-carousel" data-dir="-1">&#8249;</button>
+        <button class="carousel-arrow next" data-carousel="about-carousel" data-dir="1">&#8250;</button>
+        <div class="carousel-track" id="about-carousel-track">
+          <div class="carousel-slide"><img src="https://static.wixstatic.com/media/7eba66_d3964341206e4963a856bac28957d034~mv2.jpg" alt="Catcher+ detail"/></div>
+          <div class="carousel-slide"><img src="https://static.wixstatic.com/media/7eba66_e323a9d7f31f4887a8dc42561b667ed4~mv2.jpg" alt="Catcher+ in use"/></div>
+          <div class="carousel-slide"><img src="https://static.wixstatic.com/media/7eba66_a022e29e231e4215a4890c772896934a~mv2.jpg" alt="Catcher+ close up"/></div>
+        </div>
       </div>
-      <div class="product-img-duo">
-        <img src="https://static.wixstatic.com/media/7eba66_d3964341206e4963a856bac28957d034~mv2.jpg" alt="Catcher+ detail"/>
-        <img src="https://static.wixstatic.com/media/7eba66_e323a9d7f31f4887a8dc42561b667ed4~mv2.jpg" alt="Catcher+ in use"/>
-        <img src="https://static.wixstatic.com/media/7eba66_a022e29e231e4215a4890c772896934a~mv2.jpg" alt="Catcher+ close up"/>
+      <div class="carousel-controls" id="about-carousel-dots">
+        <button class="carousel-dot active" data-carousel="about-carousel" data-idx="0"></button>
+        <button class="carousel-dot" data-carousel="about-carousel" data-idx="1"></button>
+        <button class="carousel-dot" data-carousel="about-carousel" data-idx="2"></button>
       </div>
     </div>
   </section>
 
-  <section style="background:var(--paper)">
-    <div class="section-label">Trusted By</div>
-    <h2 class="section-title">HVAC Companies Who've<br>Already Used or Inquired</h2>
+  <section style="background:var(--paper);padding-left:0;padding-right:0">
+    <div style="padding:0 4vw"><div class="section-label">Trusted By</div>
+    <h2 class="section-title">HVAC Companies Who've<br>Already Used or Inquired</h2></div>
+
+    <!-- Desktop: full-width grid spanning edge to edge -->
     <div class="clients-bar">
-      <img src="https://static.wixstatic.com/media/7eba66_30b1c8d7999d46adb991675ef3ac2f0e~mv2.png" alt="Client"/>
-      <img src="https://static.wixstatic.com/media/7eba66_a509a6cabb4b48cb98d4a96c051acaf2~mv2.jpg" alt="Client"/>
-      <img src="https://static.wixstatic.com/media/7eba66_60809830edc14149ac315490f92baf93~mv2.webp" alt="Client"/>
-      <img src="https://static.wixstatic.com/media/7eba66_1e0b8615591c412597d7293ba4e5c88e~mv2.png" alt="Client"/>
-      <img src="https://static.wixstatic.com/media/7eba66_81c6a85980694c9a9f90e2fab7f1df09~mv2.avif" alt="Client"/>
-      <img src="https://static.wixstatic.com/media/7eba66_fadca351d5e54482b7318883df0c7e17~mv2.png" alt="Client"/>
+      <img src="https://static.wixstatic.com/media/7eba66_30b1c8d7999d46adb991675ef3ac2f0e~mv2.png" alt="Client logo"/>
+      <img src="https://static.wixstatic.com/media/7eba66_a509a6cabb4b48cb98d4a96c051acaf2~mv2.jpg" alt="Client logo"/>
+      <img src="https://static.wixstatic.com/media/7eba66_60809830edc14149ac315490f92baf93~mv2.webp" alt="Client logo"/>
+      <img src="https://static.wixstatic.com/media/7eba66_1e0b8615591c412597d7293ba4e5c88e~mv2.png" alt="Client logo"/>
+      <img src="https://static.wixstatic.com/media/7eba66_81c6a85980694c9a9f90e2fab7f1df09~mv2.avif" alt="Client logo"/>
+      <img src="https://static.wixstatic.com/media/7eba66_fadca351d5e54482b7318883df0c7e17~mv2.png" alt="Client logo"/>
+    </div>
+
+    <!-- Mobile: auto-rotating infinite scroll carousel -->
+    <div class="logo-carousel-wrapper">
+      <div class="logo-carousel-track">
+        <!-- Duplicated set for seamless loop -->
+        <img src="https://static.wixstatic.com/media/7eba66_30b1c8d7999d46adb991675ef3ac2f0e~mv2.png" alt="Client logo"/>
+        <img src="https://static.wixstatic.com/media/7eba66_a509a6cabb4b48cb98d4a96c051acaf2~mv2.jpg" alt="Client logo"/>
+        <img src="https://static.wixstatic.com/media/7eba66_60809830edc14149ac315490f92baf93~mv2.webp" alt="Client logo"/>
+        <img src="https://static.wixstatic.com/media/7eba66_1e0b8615591c412597d7293ba4e5c88e~mv2.png" alt="Client logo"/>
+        <img src="https://static.wixstatic.com/media/7eba66_81c6a85980694c9a9f90e2fab7f1df09~mv2.avif" alt="Client logo"/>
+        <img src="https://static.wixstatic.com/media/7eba66_fadca351d5e54482b7318883df0c7e17~mv2.png" alt="Client logo"/>
+        <img src="https://static.wixstatic.com/media/7eba66_30b1c8d7999d46adb991675ef3ac2f0e~mv2.png" alt="Client logo"/>
+        <img src="https://static.wixstatic.com/media/7eba66_a509a6cabb4b48cb98d4a96c051acaf2~mv2.jpg" alt="Client logo"/>
+        <img src="https://static.wixstatic.com/media/7eba66_60809830edc14149ac315490f92baf93~mv2.webp" alt="Client logo"/>
+        <img src="https://static.wixstatic.com/media/7eba66_1e0b8615591c412597d7293ba4e5c88e~mv2.png" alt="Client logo"/>
+        <img src="https://static.wixstatic.com/media/7eba66_81c6a85980694c9a9f90e2fab7f1df09~mv2.avif" alt="Client logo"/>
+        <img src="https://static.wixstatic.com/media/7eba66_fadca351d5e54482b7318883df0c7e17~mv2.png" alt="Client logo"/>
+      </div>
     </div>
   </section>
 
@@ -1098,7 +1248,7 @@
     <h2 class="section-title">Our Values</h2>
     <div class="values-grid">
       <div class="value-card"><div class="value-num">01</div><div class="value-title">Simplicity First</div><p class="value-desc">Every decision is in service of making the job easier. No unnecessary complexity, ever.</p></div>
-      <div class="value-card"><div class="value-num">02</div><div class="value-title">Built to Last</div><p class="value-desc">Heavy-duty steel chambers, grappling hooks, and rip-resistant polyester fiber — built for the field, not the showroom.</p></div>
+      <div class="value-card"><div class="value-num">02</div><div class="value-title">Built to Last</div><p class="value-desc">Industrial-grade rip-resistant polyester mesh and heavy-duty nylon construction — a bag built to handle up to 60 lbs, job after job, without wearing out.</p></div>
       <div class="value-card"><div class="value-num">03</div><div class="value-title">Real Support</div><p class="value-desc">Call (603) 762-1850 or email Easyway30@gmail.com. We're real people and we'll answer.</p></div>
       <div class="value-card"><div class="value-num">04</div><div class="value-title">Patented Innovation</div><p class="value-desc">The #30 Catcher+ is a patented product — 40 years of hands-on experience distilled into one tool.</p></div>
     </div>
@@ -1124,14 +1274,11 @@
               data-src="https://static.wixstatic.com/media/7eba66_0e9cd757437b40fa938c0522a5edee7c~mv2.jpg"
               src="https://static.wixstatic.com/media/7eba66_0e9cd757437b40fa938c0522a5edee7c~mv2.jpg" alt="View 1"/>
             <img class="product-thumb"
-              data-src="https://static.wixstatic.com/media/7eba66_27dd8c33a1fb488095357bc623974f6f~mv2.jpg"
-              src="https://static.wixstatic.com/media/7eba66_27dd8c33a1fb488095357bc623974f6f~mv2.jpg" alt="View 2"/>
-            <img class="product-thumb"
               data-src="https://static.wixstatic.com/media/7eba66_d3964341206e4963a856bac28957d034~mv2.jpg"
-              src="https://static.wixstatic.com/media/7eba66_d3964341206e4963a856bac28957d034~mv2.jpg" alt="View 3"/>
+              src="https://static.wixstatic.com/media/7eba66_d3964341206e4963a856bac28957d034~mv2.jpg" alt="View 2"/>
             <img class="product-thumb"
               data-src="https://static.wixstatic.com/media/7eba66_e323a9d7f31f4887a8dc42561b667ed4~mv2.jpg"
-              src="https://static.wixstatic.com/media/7eba66_e323a9d7f31f4887a8dc42561b667ed4~mv2.jpg" alt="View 4"/>
+              src="https://static.wixstatic.com/media/7eba66_e323a9d7f31f4887a8dc42561b667ed4~mv2.jpg" alt="View 3"/>
           </div>
         </div>
 
@@ -1178,7 +1325,7 @@
           <p style="margin-top:1rem">Featuring:</p>
           <ul>
             <li>Highly rip-resistant polyester fiber industrial-grade material, top to bottom</li>
-            <li>Heavy-duty steel chambers and grappling hooks for secure operation</li>
+            <li>Reinforced steel grappling hooks and heavy-duty attachment points for a secure, confident grip</li>
             <li>Compatible with #30 and #60 Extrol expansion tanks</li>
             <li>Multi-use: heating maintenance tool or heavy-duty tool carrier</li>
             <li>Designed for full-time use by heating industry professionals</li>
@@ -1191,7 +1338,7 @@
             <tr><td>Inventor</td><td>Peter Forcier — Keene / Marlborough, NH</td></tr>
             <tr><td>Patent</td><td>Yes — Patented Product</td></tr>
             <tr><td>Compatibility</td><td>#30 and #60 Extrol expansion tanks</td></tr>
-            <tr><td>Material</td><td>Rip-resistant polyester fiber, black nylon, heavy-duty steel chambers &amp; grappling hooks</td></tr>
+            <tr><td>Material</td><td>Rip-resistant polyester fiber mesh, black nylon structured material, reinforced steel grappling hooks</td></tr>
             <tr><td>Tank Weight Capacity</td><td>Up to 60 lbs (full #60 Extrol tank)</td></tr>
             <tr><td>Use Cases</td><td>HVAC / heating maintenance, tool carrier</td></tr>
             <tr><td>Regular Price</td><td>$150.00</td></tr>
@@ -1276,17 +1423,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
   }
 
-  document.querySelectorAll('[data-page]').forEach(function(el) {
-    el.addEventListener('click', function(e) {
-      e.preventDefault();
-      showPage(el.getAttribute('data-page'));
-    });
-  });
-  document.querySelectorAll('[data-contact]').forEach(function(el) {
-    el.addEventListener('click', function(e) {
-      e.preventDefault();
-      scrollToContact();
-    });
+  // Use event delegation for all navigation — robust against CF injection
+  document.addEventListener('click', function(e) {
+    var target = e.target.closest('[data-page]');
+    if (target) { e.preventDefault(); showPage(target.getAttribute('data-page')); return; }
+    target = e.target.closest('[data-contact]');
+    if (target) { e.preventDefault(); scrollToContact(); return; }
+    target = e.target.closest('[data-toast]');
+    if (target) { showToast(target.getAttribute('data-toast')); return; }
+    target = e.target.closest('.tab-btn');
+    if (target) {
+      var container = target.closest('.product-tabs');
+      if (container) {
+        container.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        container.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+        target.classList.add('active');
+        var panel = document.getElementById(target.getAttribute('data-tab'));
+        if (panel) panel.classList.add('active');
+      }
+      return;
+    }
+    target = e.target.closest('.product-thumb');
+    if (target) {
+      document.getElementById('main-img').src = target.getAttribute('data-src');
+      document.querySelectorAll('.product-thumb').forEach(function(t) { t.classList.remove('active'); });
+      target.classList.add('active');
+      return;
+    }
+    target = e.target.closest('[data-remove]');
+    if (target) { removeFromCart(target.getAttribute('data-remove')); return; }
+    if (e.target.closest('.add-to-cart-btn')) { addToCart(); return; }
+    if (e.target.closest('.checkout-btn')) { showToast('Secure checkout coming soon!'); return; }
+    if (e.target.closest('.form-submit')) { showToast("Message sent! We'll be in touch soon."); return; }
   });
 
   // ── TOAST ──
@@ -1296,9 +1464,6 @@ document.addEventListener('DOMContentLoaded', function() {
     toast.classList.add('show');
     setTimeout(function() { toast.classList.remove('show'); }, 3000);
   }
-  document.querySelectorAll('[data-toast]').forEach(function(btn) {
-    btn.addEventListener('click', function() { showToast(btn.getAttribute('data-toast')); });
-  });
 
   // ── CART ──
   var cart = [];
@@ -1307,7 +1472,8 @@ document.addEventListener('DOMContentLoaded', function() {
   function addToCart() {
     var qty = parseInt(document.getElementById('qty-input').value) || 1;
     var existing = cart.find(function(i) { return i.id === 'EZW-30C'; });
-    if (existing) { existing.qty += qty; } else { cart.push({ id: 'EZW-30C', name: 'EasyWay #30 Catcher+', price: PRICE, qty: qty }); }
+    if (existing) { existing.qty += qty; }
+    else { cart.push({ id: 'EZW-30C', name: 'EasyWay #30 Catcher+', price: PRICE, qty: qty }); }
     renderCart();
     showToast('Added ' + qty + ' item' + (qty > 1 ? 's' : '') + ' to cart!');
   }
@@ -1323,8 +1489,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var badge = document.getElementById('cart-badge');
     var countLabel = document.getElementById('cart-count-label');
     if (!container) return;
-    var totalQty = cart.reduce(function(s,i){ return s+i.qty; }, 0);
-    var subtotal  = cart.reduce(function(s,i){ return s+i.qty*i.price; }, 0);
+    var totalQty = cart.reduce(function(s, i) { return s + i.qty; }, 0);
+    var subtotal  = cart.reduce(function(s, i) { return s + i.qty * i.price; }, 0);
     var shipping  = subtotal === 0 ? 0 : subtotal >= 75 ? 0 : 9.99;
     var total     = subtotal + shipping;
     badge.textContent = totalQty;
@@ -1339,13 +1505,12 @@ document.addEventListener('DOMContentLoaded', function() {
       container.innerHTML = cart.map(function(item) {
         return '<div class="cart-item">' +
           '<img class="cart-item-img" src="https://static.wixstatic.com/media/7eba66_0e9cd757437b40fa938c0522a5edee7c~mv2.jpg" alt=""/>' +
-          '<div class="cart-item-info"><div class="cart-item-name">' + item.name + '</div><div class="cart-item-qty">Qty: ' + item.qty + '</div></div>' +
+          '<div class="cart-item-info"><div class="cart-item-name">' + item.name + '</div>' +
+          '<div class="cart-item-qty">Qty: ' + item.qty + '</div></div>' +
           '<div class="cart-item-price">$' + (item.qty * item.price).toFixed(2) + '</div>' +
-          '<button class="cart-remove" data-remove="' + item.id + '">✕</button></div>';
+          '<button class="cart-remove" data-remove="' + item.id + '">&#x2715;</button>' +
+          '</div>';
       }).join('');
-      container.querySelectorAll('[data-remove]').forEach(function(btn) {
-        btn.addEventListener('click', function() { removeFromCart(btn.getAttribute('data-remove')); });
-      });
     }
     document.getElementById('cart-subtotal').textContent = '$' + subtotal.toFixed(2);
     document.getElementById('cart-shipping').textContent = shipping === 0 && subtotal > 0 ? 'FREE' : shipping === 0 ? '—' : '$' + shipping.toFixed(2);
@@ -1356,44 +1521,57 @@ document.addEventListener('DOMContentLoaded', function() {
   var qtyBtns = document.querySelectorAll('.qty-btn');
   if (qtyBtns[0]) qtyBtns[0].addEventListener('click', function() {
     var i = document.getElementById('qty-input');
-    var v = parseInt(i.value) - 1; i.value = v < 1 ? 1 : v;
+    var v = parseInt(i.value) - 1;
+    i.value = v < 1 ? 1 : v;
   });
   if (qtyBtns[1]) qtyBtns[1].addEventListener('click', function() {
     var i = document.getElementById('qty-input');
-    var v = parseInt(i.value) + 1; i.value = v > 99 ? 99 : v;
+    var v = parseInt(i.value) + 1;
+    i.value = v > 99 ? 99 : v;
   });
 
-  // ── ADD TO CART ──
-  var addBtn = document.querySelector('.add-to-cart-btn');
-  if (addBtn) addBtn.addEventListener('click', addToCart);
+  // ── CAROUSEL ──
+  function initCarousel(carouselId) {
+    var carousel = document.getElementById(carouselId);
+    var track = document.getElementById(carouselId + '-track');
+    var dots = document.querySelectorAll('[data-carousel="' + carouselId + '"][data-idx]');
+    if (!carousel || !track) return;
+    var slides = track.querySelectorAll('.carousel-slide');
+    var total = slides.length;
+    var current = 0;
+    var startX = 0;
 
-  // ── CHECKOUT ──
-  var checkoutBtn = document.querySelector('.checkout-btn');
-  if (checkoutBtn) checkoutBtn.addEventListener('click', function() { showToast('Secure checkout coming soon!'); });
+    function goTo(idx) {
+      current = (idx + total) % total;
+      track.style.transform = 'translateX(-' + (current * 100) + '%)';
+      dots.forEach(function(d) { d.classList.remove('active'); });
+      var activeDot = document.querySelector('[data-carousel="' + carouselId + '"][data-idx="' + current + '"]');
+      if (activeDot) activeDot.classList.add('active');
+    }
 
-  // ── CONTACT FORM ──
-  var formSubmit = document.querySelector('.form-submit');
-  if (formSubmit) formSubmit.addEventListener('click', function() { showToast("Message sent! We'll be in touch soon."); });
-
-  // ── IMAGE SWITCHER ──
-  document.querySelectorAll('.product-thumb').forEach(function(thumb) {
-    thumb.addEventListener('click', function() {
-      document.getElementById('main-img').src = thumb.getAttribute('data-src');
-      document.querySelectorAll('.product-thumb').forEach(function(t) { t.classList.remove('active'); });
-      thumb.classList.add('active');
+    document.querySelectorAll('[data-carousel="' + carouselId + '"][data-dir]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        goTo(current + parseInt(btn.getAttribute('data-dir')));
+      });
     });
-  });
 
-  // ── TABS ──
-  document.querySelectorAll('.tab-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-      document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-      btn.classList.add('active');
-      var panel = document.getElementById(btn.getAttribute('data-tab'));
-      if (panel) panel.classList.add('active');
+    dots.forEach(function(dot) {
+      dot.addEventListener('click', function() {
+        goTo(parseInt(dot.getAttribute('data-idx')));
+      });
     });
-  });
+
+    carousel.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+    }, { passive: true });
+
+    carousel.addEventListener('touchend', function(e) {
+      var diff = startX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) goTo(current + (diff > 0 ? 1 : -1));
+    }, { passive: true });
+  }
+
+  initCarousel('about-carousel');
 
 });
 </script>
